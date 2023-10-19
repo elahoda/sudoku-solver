@@ -24,4 +24,39 @@ const joinValues = () => {
   console.log(submission);
 };
 
-solveButton.addEventListener("click", joinValues);
+const populateValues = (isSolvable, solution) => {
+  const inputs = document.querySelectorAll("input");
+  if (isSolvable && solution) {
+    inputs.forEach((input, i) => {
+      input.value = solution[i];
+    });
+  }
+};
+
+const solve = async () => {
+  joinValues();
+  const data = submission.join("");
+  console.log("data", data);
+  const options = {
+    method: "POST",
+    url: "https://solve-sudoku.p.rapidapi.com/",
+    headers: {
+      "content-type": "application/json",
+      "X-RapidAPI-Key": "87b4ed04c9msh50e3a23b0e46409p1cf6f6jsn34c4e6f11a26",
+      "X-RapidAPI-Host": "solve-sudoku.p.rapidapi.com",
+    },
+    data: {
+      puzzle: data,
+    },
+  };
+
+  try {
+    const response = await axios.request(options);
+    console.log(response.data);
+    populateValues(response.data.solvable, response.data.solution);
+  } catch (error) {
+    console.log(error);
+  }
+};
+
+solveButton.addEventListener("click", solve);
