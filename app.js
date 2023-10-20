@@ -2,7 +2,7 @@ const puzzleBoard = document.querySelector("#puzzle");
 const solveButton = document.querySelector("#solve-button");
 const solutionDisplay = document.querySelector("#solution");
 const squares = 81;
-const submission = [];
+let submission = [];
 
 for (let i = 0; i < squares; i++) {
   const inputElement = document.createElement("input");
@@ -46,30 +46,27 @@ const populateValues = (isSolvable, solution) => {
   }
 };
 
-const solve = async () => {
+const solve = () => {
   joinValues();
-  const data = submission.join("");
+  const data = { numbers: submission.join("") };
   console.log("data", data);
-  const options = {
+
+  fetch("http://localhost:8000/solve", {
     method: "POST",
-    url: "https://solve-sudoku.p.rapidapi.com/",
     headers: {
-      "content-type": "application/json",
-      "X-RapidAPI-Key": "87b4ed04c9msh50e3a23b0e46409p1cf6f6jsn34c4e6f11a26",
-      "X-RapidAPI-Host": "solve-sudoku.p.rapidapi.com",
+      "Content-Type": "application/json",
+      accept: "application/json",
     },
-    data: {
-      puzzle: data,
-    },
-  };
-
-  try {
-    const response = await axios.request(options);
-    console.log(response.data);
-    populateValues(response.data.solvable, response.data.solution);
-  } catch (error) {
-    console.log(error);
-  }
+    body: JSON.stringify(data),
+  })
+    .then((response) => response.json())
+    .then((data) => {
+      console.log(data);
+      populateValues(data.solvable, data.solution);
+      submission = [];
+    })
+    .catch((error) => {
+      console.log(error);
+    });
 };
-
 solveButton.addEventListener("click", solve);
